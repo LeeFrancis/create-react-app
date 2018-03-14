@@ -7,10 +7,25 @@ import path from 'path';
 import index from './routes/routes-index';
 import api from './routes/routes-api';
 import universalLoader from './universal';
+import getTooling from './lib/tooling';
+import config from './config';
 
 // Create our express app (using the port optionally specified)
 const app = express();
-const PORT = process.env.PORT || 3000;
+const { host, port = 3000, application, eurekaClient } = config;
+const { appName, market, domain, txnHeader } = application;
+const tooling = getTooling({
+  appName,
+  market,
+  domain,
+  eurekaClient,
+});
+// This will be conditional dependant on boolean val eureka client
+tooling.startEureka();
+// handle locale
+app.use(tooling.setLocale(config.languages));
+// Logger middleware
+app.use(tooling.loggerMiddleware(txnHeader));
 
 // Compress, parse, and log
 app.use(compression());
@@ -24,8 +39,10 @@ app.use(express.static(path.resolve(__dirname, '../build')));
 app.use('/api', api);
 app.use('/', universalLoader);
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}!`);
+app.listen(port, () => {
+  console.log(`Starting with following :`);
+  config.info();
+  console.log(`Listening on port ${port}!`);
 });
 
 // Handle the bugs somehow
@@ -33,16 +50,13 @@ app.on('error', error => {
   if (error.syscall !== 'listen') {
     throw error;
   }
-
-  const bind = typeof PORT === 'string' ? 'Pipe ' + PORT : 'Port ' + PORT;
-
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
+      console.error(port + ' requires elevated privileges');
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
+      console.error(port + ' is already in use');
       process.exit(1);
       break;
     default:

@@ -1,0 +1,55 @@
+#!groovy
+@Library("platform.infrastructure.jenkinslib")
+import com.ebsco.platform.Shared
+
+
+node("docker") {
+
+  // Create a groovy library object from the Shared.groovy file.
+  def shared = new com.ebsco.platform.Shared()
+
+  // Ensure we start with an empty directory.
+  deleteDir()
+
+  // Checkout the repo from github
+  stage ('checkout') {
+    checkout scm
+  }
+
+  /*
+   * Run npm build tasks -- npm install, test
+   * Please ensure that npm test runs everything you need
+   * Stages: Build/Test
+   */
+  env.KARMA_BROWSER="phantomjs"
+  shared.npmBuild()
+
+  /*
+   * Builds the docker file, updates tags, publishes the new container to ecr
+   * Stages: Build/Publish Docker
+   */
+  shared.dockerPublishDev()
+
+ /*
+  *
+  * Deploy to ECS
+  * Bare bones ECS deployment
+  * Stages: Deploy to ECS
+  */
+  shared.basicECSDeploy("devqa")
+  shared.setServiceAutoscaling(deployEnv: "devqa", scalingPolicyName:"edspocuiscaling", scalingAdjustment: 50, alarmName: "edspocuiAlarm", alarmDescription: "edspocuicpu", metricName: "CPUUtilization", thresholdPercent: 75, comparisonOperator: "GreaterThanOrEqualToThreshold")
+
+
+  /*
+   *
+   * Complete deployments for non-master branches
+   */
+  if(env.BRANCH_NAME != "master"){
+    println "Successfully built and deployed branch ${env.BRANCH_NAME} to devqa.  Only the master branch can deploy to additional environments."
+    return 0;
+  }
+}
+
+/* Only keep the 10 most recent builds. */
+properties([[$class: 'BuildDiscarderProperty',
+             strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
