@@ -1,6 +1,6 @@
 {
   "name": "test-cra",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "SSR with create react app",
   "repository": "facebookincubator/create-react-app",
   "license": "MIT",
