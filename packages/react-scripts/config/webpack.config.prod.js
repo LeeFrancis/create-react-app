@@ -169,8 +169,8 @@ module.exports = {
           },
           {
             test: /\.svg$/,
-            loader: 'svg-inline-loader'
-          },          
+            loader: 'svg-react-loader',
+          },
           // Process JS with Babel.
           {
             test: /\.(js|jsx|mjs)$/,
@@ -214,11 +214,12 @@ module.exports = {
                         importLoaders: 1,
                         minimize: true,
                         modules: true,
-                        localIdentName: '[path][name]__[local]--[hash:base64:5]',    
+                        localIdentName:
+                          '[path][name]__[local]--[hash:base64:5]',
                         sourceMap: shouldUseSourceMap,
                       },
                     },
-                    'postcss-loader'
+                    'postcss-loader',
                   ],
                 },
                 extractTextPluginOptions

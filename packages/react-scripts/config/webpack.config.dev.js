@@ -165,8 +165,8 @@ module.exports = {
           },
           {
             test: /\.svg$/,
-            loader: 'svg-inline-loader'
-          },          
+            loader: 'svg-react-loader',
+          },
           // Process JS with Babel.
           {
             test: /\.(js|jsx|mjs)$/,
@@ -192,16 +192,17 @@ module.exports = {
             test: /\.css$/,
             use: ExtractTextPlugin.extract({
               fallback: 'style-loader',
-                use: [{
-                  loader: "css-loader",
+              use: [
+                {
+                  loader: 'css-loader',
                   options: {
                     modules: true,
-                    localIdentName: '[path][name]__[local]--[hash:base64:5]',    
-                  }
+                    localIdentName: '[path][name]__[local]--[hash:base64:5]',
+                  },
                 },
-                'postcss-loader'
-              ]
-            })
+                'postcss-loader',
+              ],
+            }),
           },
           // "file" loader makes sure those assets get served by WebpackDevServer.
           // When you `import` an asset, you get its (virtual) filename.
@@ -228,8 +229,8 @@ module.exports = {
   plugins: [
     new ExtractTextPlugin({
       allChunks: true,
-      filename: cssFilename
-    }),      
+      filename: cssFilename,
+    }),
     // Makes some environment variables available in index.html.
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
