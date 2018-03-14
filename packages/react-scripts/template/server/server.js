@@ -7,9 +7,7 @@ import path from 'path';
 import index from './routes/routes-index';
 import api from './routes/routes-api';
 import universalLoader from './universal';
-require('css-modules-require-hook/preset');
 
-console.log('Going through server');
 // Create our express app (using the port optionally specified)
 const app = express();
 const PORT = process.env.PORT || 3000;

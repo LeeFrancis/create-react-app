@@ -1,5 +1,6 @@
 import path from 'path';
 import fs from 'fs';
+import 'css-modules-require-hook/preset';
 
 import React from 'react';
 import { renderToString } from 'react-dom/server';
@@ -55,7 +56,7 @@ const universalLoader = (req, res) => {
         helmet.title.toString() +
         helmet.meta.toString() +
         helmet.link.toString(),
-      body: routeMarkup
+      body: routeMarkup,
     });
 
     // Up, up, and away...

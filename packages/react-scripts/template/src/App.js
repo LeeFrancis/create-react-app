@@ -4,7 +4,6 @@ import styles from './App.css';
 
 class App extends Component {
   render() {
-    console.log(JSON.stringify(styles));
     return (
       <div className={styles.app}>
         <header className={styles.appHeader}>
