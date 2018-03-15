@@ -1,5 +1,5 @@
 {
-  "plugins": ["inline-react-svg"],
+  "plugins": [],
   "presets": ["env", "react-app"],
   "ignore": [
     "build",
