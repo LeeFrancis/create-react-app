@@ -1,53 +1,108 @@
-#!groovy
-@Library("platform.infrastructure.jenkinslib")
-import com.ebsco.platform.Shared
+#!Groovy
+@Library("platform.infrastructure.pipelinelibrary") _
+
+DEVQA_ENV = "devqa"
+INTEGRATION_ENV = "integration"
+LIVE_ENV = "live"
+AWS_REGION = "us-east-1"
+
+// Global Pipeline Settings, like keep the 10 most recent builds, etc
+withGlobalPipelineProperties () {
+
+	// Begin Build/CI Section
+	def buildNodeId = platformDefaults.getBuildNodeLabel()
+
+	// Node properties to setup logs to send to aggr(sumo)
+	withNodeWrapper(buildNodeId) {
+    // Ensure we start with an empty directory.
+    deleteDir()
+
+		//Checkout SCM
+		stage("Checkout") {
+			checkout scm
+		}
+
+		/*
+		* Run npm build tasks -- npm install, test
+		* Please ensure that npm test runs everything you need
+		* Stages: Build/Test
+		*/
+		stage ('Build/Test') {
+      sh '/opt/node/bin/npm --version' // Want this in the build log
+      sh '/opt/node/bin/npm install'   // Install dependencies
+      sh '/opt/node/bin/npm run test  -- --coverage'    // Run tests
+		}
 
 
-node("docker") {
+    /*
+    * Short-circuits all non-PR branches for GitHub "Checks"
+    */
+    if (env.BRANCH_NAME.startsWith("PR-")) {
+      println "Successfully built and tested ${env.BRANCH_NAME} for GitHub check."
+      return 0
+    }
 
-  // Create a groovy library object from the Shared.groovy file.
-  def shared = new com.ebsco.platform.Shared()
+    /*
+    * Run the sonar scanner to verify code quality
+    * Stages: Sonar
+    */
+    // stage('SonarScan for JS'){
+    //   sh 'gulp sonar'
+    // }
 
-  // Ensure we start with an empty directory.
-  deleteDir()
+		//Create Docker image and upload to ECR
+    stage('Docker Build') {
+		  dockerBuildPush()
+    }
 
-  // Checkout the repo from github
-  stage ('checkout') {
-    checkout scm
-  }
+    // End Build/CI Section
+    // Begin Deploy/CD Section
+    def ecsDeployParametersPath = 'cloudformation/deploy/parameters.json'
 
-  /*
-   * Run npm build tasks -- npm install, test
-   * Please ensure that npm test runs everything you need
-   * Stages: Build/Test
-   */
-  env.KARMA_BROWSER="phantomjs"
-  shared.npmBuild()
+		//eis-deliverydevqa
+		withDeployWrapper(DEVQA_ENV) {
+      ecsDeploy deployEnv: DEVQA_ENV,  parametersPath: ecsDeployParametersPath
+      performRelease releaseMethod: 'fast', deployEnv: DEVQA_ENV
+		}
 
-  /*
-   * Builds the docker file, updates tags, publishes the new container to ecr
-   * Stages: Build/Publish Docker
-   */
-  shared.dockerPublishDev()
+		//eis-deliveryintegration
+		// withDeployWrapper(INTEGRATION_ENV){
 
- /*
-  *
-  * Deploy to ECS
-  * Bare bones ECS deployment
-  * Stages: Deploy to ECS
-  */
-  shared.basicECSDeploy("devqa")
-  shared.setServiceAutoscaling(deployEnv: "devqa", scalingPolicyName:"edspocuiscaling", scalingAdjustment: 50, alarmName: "edspocuiAlarm", alarmDescription: "edspocuicpu", metricName: "CPUUtilization", thresholdPercent: 75, comparisonOperator: "GreaterThanOrEqualToThreshold")
+    //   stage("Integration Deployment Gate"){
+    //     timeout(time: 120, unit: 'MINUTES'){
+    //       input "Proceed to Deploy to Integration"
+    //     }
+    //   }
 
+		// 	ecsDeploy deployEnv: INTEGRATION_ENV,  parametersPath: ecsDeployParametersPath
+    //   sh "sleep 120"
 
-  /*
-   *
-   * Complete deployments for non-master branches
-   */
-  if(env.BRANCH_NAME != "master"){
-    println "Successfully built and deployed branch ${env.BRANCH_NAME} to devqa.  Only the master branch can deploy to additional environments."
-    return 0;
-  }
+		// 	println "Running E2E Tests - Integration"
+    //     stage('End-to-End Testing - Integration') {
+    //       withCredentials([usernamePassword(credentialsId: 'saucelabs_api_key', usernameVariable: 'SAUCE_USERNAME', passwordVariable: 'SAUCE_ACCESS_KEY')]) {
+    //         sh "export TEST_ENV=${INTEGRATION_ENV} && npm run test:e2e:jenkins"
+    //       }
+    //   }
+
+		// 	performRelease releaseMethod: 'fast', deployEnv: INTEGRATION_ENV
+		// }
+
+		// // eis-deliverylive
+		// withDeployWrapper(LIVE_ENV){
+
+    //   stage("Live Deployment Gate"){
+    //     timeout(time: 120, unit: 'MINUTES'){
+    //       input "Proceed to Deploy to Live"
+    //     }
+    //   }
+
+		// 	ecsDeploy deployEnv: LIVE_ENV,  parametersPath: ecsDeployParametersPath
+		// 	performRelease releaseMethod: 'fast', deployEnv: LIVE_ENV
+		// }
+
+	}
+
+	// End Deploy/CD Section
 }
 
 /* Only keep the 10 most recent builds. */

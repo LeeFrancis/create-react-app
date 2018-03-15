@@ -1,0 +1,50 @@
+[
+  {
+    "ParameterKey": "AppType",
+    "ParameterValue": "node"
+  },
+  {
+    "ParameterKey": "MaxCapacity",
+    "ParameterValue": "20"
+  },
+  {
+    "ParameterKey": "MinCapacity",
+    "ParameterValue": "2"
+  },
+  {
+    "ParameterKey": "ECSScalingRole",
+    "ParameterValue": "%ECS_AUTOSCALING_ROLE"
+  },
+  {
+    "ParameterKey": "Environment",
+    "ParameterValue": "%ENVIRONMENT_VALUE"
+  },
+  {
+    "ParameterKey": "ProjectName",
+    "ParameterValue": "%PROJECT_NAME"
+  },
+  {
+    "ParameterKey": "TeamName",
+    "ParameterValue": "%TEAM_NAME"
+  },
+  {
+    "ParameterKey": "ClusterName",
+    "ParameterValue": "%CLUSTER_NAME"
+  },
+  {
+    "ParameterKey": "ImageId",
+    "ParameterValue": "%IMAGEID"
+  },
+  {
+    "ParameterKey": "AppVersion",
+    "ParameterValue": "%APPVERSION"
+  },
+  {
+    "ParameterKey": "ContainerPort",
+    "ParameterValue": "3000"
+  },
+  {
+    "ParameterKey": "NodeEnv",
+    "ParameterValue": "production"
+  }
+]
