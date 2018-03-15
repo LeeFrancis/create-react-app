@@ -1,7 +1,7 @@
 const pkg = require('../../package.json');
 
 const appEnv = process.env.APP_ENV || 'localhost';
-const { domain, market } = pkg.name.split('.').reverse();
+const [domain, market] = pkg.name.split('.').reverse();
 const config = {
   host: process.env.NODE_HOST || 'localhost', // Define your host from 'package.json'
   port: process.env.PORT || 3000,
