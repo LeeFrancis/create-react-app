@@ -5,6 +5,7 @@ const [domain, market] = pkg.name.split('.').reverse();
 const config = {
   host: process.env.NODE_HOST || 'localhost', // Define your host from 'package.json'
   port: process.env.PORT || 3000,
+  serverSideRender: true,
   eurekaClient: false,
   application: {
     appName: pkg.name,

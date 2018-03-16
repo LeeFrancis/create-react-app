@@ -7,7 +7,7 @@ import createHistory from 'history/createBrowserHistory';
 import { ConnectedRouter } from 'react-router-redux';
 
 // Uncomment this when you are done developing your app..
-import registerServiceWorker from './registerServiceWorker';
+// import registerServiceWorker from './registerServiceWorker';
 
 // Get initial state from server-side rendering
 const initialState = window.__INITIAL_STATE__;
