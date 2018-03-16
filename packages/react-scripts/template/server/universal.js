@@ -6,11 +6,10 @@ import { renderToString } from 'react-dom/server';
 import Helmet from 'react-helmet';
 
 import { Provider } from 'react-redux';
-import { ConnectedRouter } from 'react-router-redux';
-import { Route } from 'react-router-dom';
-import createServerStore from './store';
-
-import App from '../src/app';
+import { Route, StaticRouter } from 'react-router-dom';
+import createServerStore from '../src/utils/configureStore';
+import App from '../src/components/App';
+import createHistory from 'history/createMemoryHistory';
 
 // A simple helper function to prepare the HTML markup
 const prepHTML = (data, { html, head, body }) => {
@@ -34,14 +33,16 @@ const universalLoader = (req, res) => {
     }
 
     // Create a store and sense of history based on the current path
-    const { store, history } = createServerStore(req.path);
+    const history = createHistory();
+    const store = createServerStore(history);
+    const routerContext = {};
 
     // Render App in React
     const routeMarkup = renderToString(
       <Provider store={store}>
-        <ConnectedRouter history={history}>
+        <StaticRouter location={req.url} context={routerContext}>
           <Route component={App} />
-        </ConnectedRouter>
+        </StaticRouter>
       </Provider>
     );
 
