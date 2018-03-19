@@ -36,7 +36,7 @@ const register = logger =>
       },
     })
     .then(eurekaClient => {
-      const handleDeregister = () => {
+      eurekaClient.handleDeregister = () => {
         eurekaClient.stop(err => {
           if (err) {
             logger.error(err);
@@ -46,7 +46,7 @@ const register = logger =>
         });
       };
 
-      return Object.assign({}, eurekaClient, handleDeregister);
+      return eurekaClient;
     });
 
 module.exports = { register };

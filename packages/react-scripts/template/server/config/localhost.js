@@ -11,7 +11,7 @@ module.exports = merge(defaultConfig, {
     hostName: pkg.name,
     ipAddress: '',
     region: '',
-    hostPort: 3000,
+    hostPort: 3001,
     eurekaPort: 8761,
     class: 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
     name: 'MyOwn',
