@@ -30,6 +30,7 @@ withGlobalPipelineProperties () {
 		stage ('Build/Test') {
       sh '/opt/node/bin/npm --version' // Want this in the build log
       sh '/opt/node/bin/npm install'   // Install dependencies
+      sh '/opt/node/bin/npm run build'   // Run the actual build
       sh '/opt/node/bin/npm run test  -- --coverage'    // Run tests
 		}
 
