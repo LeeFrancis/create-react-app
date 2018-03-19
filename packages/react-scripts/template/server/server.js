@@ -42,6 +42,8 @@ app.get('/health', (req, res) =>
     uptime: process.uptime(),
   })
 );
+// NFR for app info
+app.get('/info', (req, res) => res.status(200).send(config.info()));
 app.get('*', universalLoader);
 
 app.listen(port, () => {
