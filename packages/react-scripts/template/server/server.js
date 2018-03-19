@@ -14,12 +14,15 @@ import config from './config';
 const app = express();
 const { host, port = 3000, application, eurekaClient } = config;
 const { appName, market, domain, txnHeader } = application;
-const tooling = getTooling({
-  appName,
-  market,
-  domain,
-  eurekaClient,
-});
+const tooling = getTooling(
+  {
+    appName,
+    market,
+    domain,
+    eurekaClient,
+  },
+  module
+);
 // This will be conditional dependant on boolean val eureka client
 tooling.startEureka();
 // handle locale

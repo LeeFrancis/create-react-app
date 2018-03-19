@@ -5,4 +5,4 @@ ENV DIR /usr/src/app
 RUN mkdir -p $DIR
 WORKDIR $DIR
 COPY . $DIR
-CMD ["node", "src/server"]
+CMD ["node", "server"]
