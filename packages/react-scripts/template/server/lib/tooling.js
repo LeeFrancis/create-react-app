@@ -11,7 +11,7 @@ const getTooling = (options, caller) => {
   const startEureka = () => {
     if (enableEureka) {
       eurekaClient
-        .register(loggerObject(caller))
+        .register()
         .then(client => {
           // If Eureka client registers successfully handle de-registration with SIGTERM and SIGINT
           client.once('registered', () => {
