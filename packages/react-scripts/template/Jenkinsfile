@@ -14,11 +14,12 @@ withGlobalPipelineProperties () {
 
 	// Node properties to setup logs to send to aggr(sumo)
 	withNodeWrapper(buildNodeId) {
-    // Ensure we start with an empty directory.
-    deleteDir()
+
+    // deleteDir()
 
 		//Checkout SCM
 		stage("Checkout") {
+      // Ensure we start with an empty directory.
 			checkout scm
 		}
 
@@ -30,23 +31,16 @@ withGlobalPipelineProperties () {
 		stage ('Build/Test') {
       sh '/opt/node/bin/npm --version' // Want this in the build log
       sh '/opt/node/bin/npm install'   // Install dependencies
-      sh '/opt/node/bin/npm run build'   // Run the actual build
-      sh '/opt/node/bin/npm run test  -- --coverage'    // Run tests
+      sh '/opt/node/bin/npm run test -- --coverage'    // Run tests
 		}
-
-
-    /*
-    * Short-circuits all non-PR branches for GitHub "Checks"
-    */
-    if (env.BRANCH_NAME.startsWith("PR-")) {
-      println "Successfully built and tested ${env.BRANCH_NAME} for GitHub check."
-      return 0
-    }
 
     /*
     * Run the sonar scanner to verify code quality
     * Stages: Sonar
     */
+
+    sh 'sudo bash'
+    // gulpSonarScan()
     // stage('SonarScan for JS'){
     //   sh 'gulp sonar'
     // }
@@ -58,6 +52,7 @@ withGlobalPipelineProperties () {
 
     // End Build/CI Section
     // Begin Deploy/CD Section
+
     def ecsDeployParametersPath = 'cloudformation/deploy/parameters.json'
 
 		//eis-deliverydevqa
@@ -66,46 +61,39 @@ withGlobalPipelineProperties () {
       performRelease releaseMethod: 'fast', deployEnv: DEVQA_ENV
 		}
 
+    return 0; // TODO - remove this line when ready to bring in integration and live.
+    //Integration and Live Deployments
+    if(env.BRANCH_NAME != "master"){
+      println "No promotion past devqa on a branch which is not master"
+      return 0;
+    }
+
+
 		//eis-deliveryintegration
-		// withDeployWrapper(INTEGRATION_ENV){
+		withDeployWrapper(INTEGRATION_ENV){
+			ecsDeploy deployEnv: INTEGRATION_ENV,  parametersPath: ecsDeployParametersPath
+      sh "sleep 90"
+      stage('End-to-End Testing') {
+        withCredentials([usernamePassword(credentialsId: 'saucelabs_api_key', usernameVariable: 'SAUCE_USERNAME', passwordVariable: 'SAUCE_ACCESS_KEY')]) {
+          sh "export TEST_ENV=${INTEGRATION_ENV} && npm run e2e:ci"
+        }
+      }
+			performRelease releaseMethod: 'fast', deployEnv: INTEGRATION_ENV
+		}
 
-    //   stage("Integration Deployment Gate"){
-    //     timeout(time: 120, unit: 'MINUTES'){
-    //       input "Proceed to Deploy to Integration"
-    //     }
-    //   }
-
-		// 	ecsDeploy deployEnv: INTEGRATION_ENV,  parametersPath: ecsDeployParametersPath
-    //   sh "sleep 120"
-
-		// 	println "Running E2E Tests - Integration"
-    //     stage('End-to-End Testing - Integration') {
-    //       withCredentials([usernamePassword(credentialsId: 'saucelabs_api_key', usernameVariable: 'SAUCE_USERNAME', passwordVariable: 'SAUCE_ACCESS_KEY')]) {
-    //         sh "export TEST_ENV=${INTEGRATION_ENV} && npm run test:e2e:jenkins"
-    //       }
-    //   }
-
-		// 	performRelease releaseMethod: 'fast', deployEnv: INTEGRATION_ENV
-		// }
-
-		// // eis-deliverylive
-		// withDeployWrapper(LIVE_ENV){
-
-    //   stage("Live Deployment Gate"){
-    //     timeout(time: 120, unit: 'MINUTES'){
-    //       input "Proceed to Deploy to Live"
-    //     }
-    //   }
-
-		// 	ecsDeploy deployEnv: LIVE_ENV,  parametersPath: ecsDeployParametersPath
-		// 	performRelease releaseMethod: 'fast', deployEnv: LIVE_ENV
-		// }
+		//eis-deliverylive
+		withDeployWrapper(LIVE_ENV){
+			ecsDeploy deployEnv: LIVE_ENV,  parametersPath: ecsDeployParametersPath
+      sh "sleep 90"
+      stage('End-to-End Testing') {
+        withCredentials([usernamePassword(credentialsId: 'saucelabs_api_key', usernameVariable: 'SAUCE_USERNAME', passwordVariable: 'SAUCE_ACCESS_KEY')]) {
+          sh "export TEST_ENV=${LIVE_ENV} && npm run e2e:ci"
+        }
+      }
+			performRelease releaseMethod: 'canary', deployEnv: LIVE_ENV
+		}
 
 	}
 
 	// End Deploy/CD Section
 }
-
-/* Only keep the 10 most recent builds. */
-properties([[$class: 'BuildDiscarderProperty',
-             strategy: [$class: 'LogRotator', numToKeepStr: '10']]])
