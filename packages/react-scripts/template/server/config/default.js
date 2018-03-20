@@ -9,6 +9,8 @@ const config = {
   eurekaClient: false,
   application: {
     appName: pkg.name,
+    description: pkg.description,
+    version: pkg.version,
     market,
     domain,
     txnHeader: 'transaction_id',
@@ -29,6 +31,13 @@ const config = {
   paths: {},
   languages: [{ code: 'en', label: 'English' }],
   info: function() {
+    return {
+      name: this.application.appName || 'N/A',
+      description: this.application.description || 'N/A',
+      version: this.application.version || 'N/A',
+    };
+  },
+  printInfo: function() {
     console.log('Current Info');
     console.log(`        appName : ${this.application.appName || 'N/A'}`);
     console.log(`        market : ${this.application.market || 'N/A'}`);

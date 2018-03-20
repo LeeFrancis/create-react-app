@@ -48,7 +48,7 @@ app.get('*', universalLoader);
 
 app.listen(port, () => {
   console.log(`Starting with following :`);
-  config.info();
+  config.printInfo();
   console.log(`Listening on port ${port}!`);
 });
 
