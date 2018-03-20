@@ -41,7 +41,7 @@
   },
   {
     "ParameterKey": "ContainerPort",
-    "ParameterValue": "3000"
+    "ParameterValue": "3001"
   },
   {
     "ParameterKey": "NodeEnv",

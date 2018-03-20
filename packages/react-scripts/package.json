@@ -1,6 +1,6 @@
 {
   "name": "eis-create-react-app",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "SSR with create react app",
   "repository": "facebookincubator/create-react-app",
   "license": "MIT",
