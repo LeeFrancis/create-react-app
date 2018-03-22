@@ -1,12 +1,8 @@
 /* eslint-disable react/no-danger */
 import * as React from 'react';
+import PropTypes from 'prop-types';
 
-type Props = {
-  children?: React.Node,
-  team: string,
-};
-
-class ErrorBoundary extends React.Component<Props> {
+class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false };
@@ -33,4 +29,14 @@ class ErrorBoundary extends React.Component<Props> {
     return children;
   }
 }
+
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired,
+  team: PropTypes.string,
+};
+
+ErrorBoundary.defaultProps = {
+  team: undefined,
+};
+
 export default ErrorBoundary;

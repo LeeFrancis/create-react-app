@@ -6,7 +6,7 @@ import routes from '../../routes';
 
 // Import your global styles here
 import styles from './styles.css';
-import ErrorHandler from '../../error';
+import ErrorBoundary from '../../error';
 
 // wrap <Route> and use this everywhere instead, then when
 // sub routes are added to any route it'll work
@@ -17,9 +17,9 @@ const RouteWithSubRoutes = route => (
     path={route.path}
     render={props => (
       // Pass the sub-routes down to keep nesting
-      <ErrorHandler team={route.team || null}>
+      <ErrorBoundary team={route.team || null}>
         <route.component {...props} routes={route.routes || null} />
-      </ErrorHandler>
+      </ErrorBoundary>
     )}
   />
 );

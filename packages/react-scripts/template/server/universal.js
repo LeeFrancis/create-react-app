@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-filename-extension, consistent-return */
 import path from 'path';
 import fs from 'fs';
 
@@ -7,19 +8,20 @@ import Helmet from 'react-helmet';
 import chalk from 'chalk';
 import { Provider } from 'react-redux';
 import { Route, StaticRouter, matchPath } from 'react-router-dom';
+import createHistory from 'history/createMemoryHistory';
 import createServerStore from '../src/utils/configureStore';
 import App from '../src/components/App';
-import createHistory from 'history/createMemoryHistory';
 import clientRoutes from '../src/routes';
 import config from './config';
 
 // A simple helper function to prepare the HTML markup
 const prepHTML = (data, { html, head, body }) => {
-  data = data.replace('<html lang="en">', `<html ${html}`);
-  data = data.replace('</head>', `${head}</head>`);
-  data = data.replace('<div id="root"></div>', `<div id="root">${body}</div>`);
+  let str = data.replace('<html lang="en">', `<html ${html}`);
+  str = str.replace('<html lang="en">', `<html ${html}`);
+  str = str.replace('</head>', `${head}</head>`);
+  str = str.replace('<div id="root"></div>', `<div id="root">${body}</div>`);
 
-  return data;
+  return str;
 };
 
 const universalLoader = (req, res) => {
@@ -32,8 +34,7 @@ const universalLoader = (req, res) => {
       return res.status(500).end();
     }
     if (!config.serverSideRender) {
-      res.status(200).send(htmlData);
-      return;
+      return res.status(200).send(htmlData);
     }
     // Create a store and sense of history based on the current path
     const history = createHistory();
@@ -41,15 +42,14 @@ const universalLoader = (req, res) => {
     const routerContext = {};
 
     // Here's the method for loading data from server-side
-    const loadBranchData = (): Promise<*> | Object => {
+    const loadBranchData = () => {
       const promises = [];
       clientRoutes.some(route => {
         const match = matchPath(req.path, route);
 
-        if (match && route.loadData)
-          // $FlowFixMe: the params of pre-load actions are dynamic
+        if (match && route.loadData) {
           promises.push(route.loadData(store.dispatch, match.params));
-
+        }
         return match;
       });
       return Promise.all(promises);
@@ -60,6 +60,7 @@ const universalLoader = (req, res) => {
         // First thing to do is load all needed data
         await loadBranchData();
         // Render App in React
+        // eslint-disable-next-line function-paren-newline
         const htmlContent = renderToString(
           <Provider store={store}>
             <StaticRouter location={req.url} context={routerContext}>
@@ -91,9 +92,9 @@ const universalLoader = (req, res) => {
         });
         // Pass the route and initial state into html template
         res.status(status).send(html);
-      } catch (err) {
+      } catch (renderErr) {
         res.status(404).send('Not Found :(');
-        console.error(chalk.red(`Rendering routes error: ${err}`));
+        console.error(chalk.red(`Rendering routes error: ${renderErr}`));
       }
     })();
   });

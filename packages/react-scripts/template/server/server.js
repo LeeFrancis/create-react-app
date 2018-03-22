@@ -9,7 +9,7 @@ import config from './config';
 
 // Create our express app (using the port optionally specified)
 const app = express();
-const { host, port = 3001, application, eurekaClient } = config;
+const { port = 3001, application, eurekaClient } = config;
 const { appName, market, domain, txnHeader } = application;
 const tooling = getTooling(
   {
@@ -47,7 +47,7 @@ app.get('/info', (req, res) => res.status(200).send(config.info()));
 app.get('*', universalLoader);
 
 app.listen(port, () => {
-  console.log(`Starting with following :`);
+  console.log('Starting with following :');
   config.printInfo();
   console.log(`Listening on port ${port}!`);
 });
@@ -59,11 +59,11 @@ app.on('error', error => {
   }
   switch (error.code) {
     case 'EACCES':
-      console.error(port + ' requires elevated privileges');
+      console.error(`${port} requires elevated privileges`);
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(port + ' is already in use');
+      console.error(`${port} is already in use`);
       process.exit(1);
       break;
     default:

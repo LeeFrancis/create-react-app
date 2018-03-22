@@ -1,4 +1,3 @@
-/* @flow */
 import React from 'react';
 import { ReactA11yTitle } from 'react-ref-extensions';
 import { Link } from 'react-router-dom';
@@ -10,6 +9,7 @@ const Home = () => (
     <ul>
       <li>
         <Link
+          href="/hello"
           to={{
             pathname: '/hello',
             state: { lastClick: 'hello' },

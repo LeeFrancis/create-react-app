@@ -22,7 +22,7 @@ const createServerStore = (path = '/') => {
   // Return all that I need
   return {
     history,
-    store
+    store,
   };
 };
 

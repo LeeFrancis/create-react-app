@@ -4,6 +4,7 @@ const merge = require('lodash/fp/merge');
 const eisPckJson = {
   scripts: {
     'start:ssr': 'better-npm-run start:ssr',
+    lint: './node_modules/.bin/eslint  src/**.jsx  src/**.js server/**.js',
   },
   betterScripts: {
     'start:ssr': {
